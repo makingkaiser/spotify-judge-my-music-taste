@@ -1,6 +1,6 @@
 # Judge My Top Songs (Inspired By Receiptify)
 
-This app judges your top songs by pulling in your top songs. 
+This app judges your top songs by pulling in your top songs. The phone screen is a full mockup of Each text bubble is rendered individually based on the LLM's response.
 
 ![image](roast-result.png)
 
