@@ -1,0 +1,18 @@
+{
+  "name": "barebones-spotify-app",
+  "version": "1.0.0",
+  "description": "Minimal Spotify authentication and top tracks display",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "node-fetch": "^2.6.7",
+    "querystring": "^0.2.1",
+    "request": "^2.88.2"
+  }
+}

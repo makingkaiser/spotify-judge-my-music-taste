@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="phone-chat.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .login-section {
+            text-align: center;
+            padding: 50px 0;
+        }
+        
+        .login-btn {
+            background-color: #1DB954;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .login-btn:hover {
+            background-color: #1ed760;
+        }
+        
+        .data-section {
+            display: none;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background-color: #e0e0e0;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        
+        .tab.active {
+            background-color: #1DB954;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .list-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .list-item:last-child {
+            border-bottom: none;
+        }
+        
+        .item-name {
+            font-weight: bold;
+        }
+        
+        .item-artist {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .item-popularity {
+            background-color: #1DB954;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #1DB954;
+        }
+        
+        h2 {
+            color: #333;
+        }
+        
+        .track-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .track-item:hover {
+            background-color: #f8f8f8;
+        }
+        
+        .track-item:last-child {
+            border-bottom: none;
+        }
+        
+        .track-number {
+            background: #1DB954;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .track-info {
+            flex-grow: 1;
+        }
+        
+        .track-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .track-artist {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* Side-by-side layout */
+        .main-content {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+            align-items: flex-start;
+        }
+        
+        .playlist-section {
+            flex: 1;
+            min-width: 400px;
+            max-width: 600px;
+        }
+        
+        .roast-section {
+            flex: 1;
+            min-width: 0;
+            max-width: 500px;
+        }
+        
+        /* Responsive layout */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .roast-section {
+                max-width: none;
+            }
+        }
+        
+        /* Roast Loading Animation */
+        .roast-loading {
+            text-align: center;
+            padding: 40px 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e9ecef;
+            border-top: 4px solid #1DB954;
+            border-radius: 50%;
+            margin: 0 auto 20px auto;
+        }
+        
+        .loading-dots {
+            margin-top: 10px;
+            font-size: 20px;
+            color: #1DB954;
+        }
+        
+        /* Simple Roast Text Box */
+        .roast-textbox {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .roast-content {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .roast-line {
+            margin-bottom: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .roast-line:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .roast-line::before {
+            content: "🔥";
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        /* Full response style (when extraction fails) */
+        .full-response {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            color: #856404;
+        }
+        
+        .full-response::before {
+            content: "🤖 Full AI Response:";
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <!-- Login Section -->
+        <div id="login-section" class="login-section">
+            <h2>Connect your Spotify account to see your top music!</h2>
+            <a href="/login" class="login-btn">Login with Spotify</a>
+        </div>
+        
+        <!-- Main Data Section -->
+        <div id="data-section" class="data-section">
+            
+            <div class="main-content">
+                <!-- Left side - Playlist -->
+                <div class="playlist-section">
+                    <div id="embed-iframe"></div>
+                </div>
+                
+                <!-- Right side - Phone Chat Screen -->
+                <div class="roast-section">
+                    
+                    <div class="phoneWrapper">
+                        <div class="phone">
+                            <!-- HEADER / STATUS BAR -->
+                            <div class="header">
+                                <div class="statusBar">
+                                    <img src="icons/time+status.svg" alt="Status bar with time and icons" class="statusBarSvg">
+                                </div>
+
+                                <!-- CONTACT TITLE BAR -->
+                                <div class="titleBar">
+                                    <div class="titleLeft">
+                                        <img src="icons/Arrow.svg" alt="Back" class="backArrow">
+                                    </div>
+                                    <div class="titleCenter">
+                                        <div class="profileSection">
+                                            <img src="icons/profile.svg" alt="Profile" class="profilePic">
+                                            <div class="phoneNumberSection">
+                                                <span class="phoneNumber">+1 (423) 372-8164</span>
+                                                <img src="icons/chevron-grey.svg" alt="Details" class="detailsChevron">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="titleRight">
+                                        <!-- Empty -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- CHAT BODY -->
+                            <div class="body" id="chat">
+                                <!-- Message Info -->
+                                <div class="messageInfo">
+                                    <span class="messageType">Text Message • SMS</span>
+                                    <span class="messageTime">Mon, Aug 4 at 7:54 PM</span>
+                                </div>
+                                
+                                <!-- Loading state for chat -->
+                                <div id="chat-loading" class="chat-loading">
+                                    <div class="loading-spinner"></div>
+                                    <p>AI is analyzing your music taste...</p>
+                                </div>
+                                <!-- Messages will be injected here -->
+                            </div>
+
+                            <!-- MESSAGE BAR -->
+                            <div class="messageBar">
+                                <img src="icons/Message Bar.svg" alt="Message input bar" class="messageBarSvg">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SPOTIFY_API_BASE = 'https://api.spotify.com/v1';
+        let accessToken = null;
+        let username = null;
+
+        // Extract access token from URL hash
+        function getHashParams() {
+            const hashParams = {};
+            const hash = window.location.hash.substring(1);
+            const pairs = hash.split('&');
+            
+            for (let i = 0; i < pairs.length; i++) {
+                const pair = pairs[i].split('=');
+                hashParams[pair[0]] = decodeURIComponent(pair[1]);
+            }
+            
+            return hashParams;
+        }
+
+        // Make API request to Spotify
+        async function makeSpotifyRequest(endpoint, method = 'GET', body = null) {
+            const url = `${SPOTIFY_API_BASE}${endpoint}`;
+            const options = {
+                method: method,
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken,
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            if (body && method !== 'GET') {
+                options.body = JSON.stringify(body);
+            }
+            
+            console.log(`🌐 API Request: ${method} ${url}`);
+            console.log('🌐 Request options:', options);
+            
+            try {
+                const response = await fetch(url, options);
+                console.log(`🌐 Response status: ${response.status} ${response.statusText}`);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('❌ API Error Response:', errorText);
+                    throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorText}`);
+                }
+                
+                const data = await response.json();
+                console.log('🌐 Response data:', data);
+                return data;
+            } catch (error) {
+                console.error('❌ Network/Parse Error:', error);
+                throw error;
+            }
+        }
+
+
+
+
+        async function createPlaylistFromTopTracks(tracks) {
+            try {
+                console.log('🎵 Creating playlist for user:', username);
+                console.log('🎵 Tracks to add:', tracks.map(t => `${t.name} - ${t.artists[0].name}`));
+                
+                // Create the playlist (correct API endpoint)
+                const playlistData = {
+                    name: `My Top 10 Tracks ${new Date().getFullYear()}`,
+                    description: `My most played tracks of ${new Date().getFullYear()} - Generated by Barebones Spotify App`,
+                    public: true
+                };
+
+                console.log('🎵 Creating playlist with data:', playlistData);
+                
+                const playlist = await makeSpotifyRequest(
+                    `/users/${username}/playlists`, 
+                    'POST', 
+                    playlistData
+                );
+
+                console.log('✅ Playlist created successfully:', playlist);
+
+                // Add tracks to playlist
+                const trackUris = tracks.map(track => track.uri);
+                console.log('🎵 Adding tracks with URIs:', trackUris);
+                
+                const addTracksResult = await makeSpotifyRequest(
+                    `/playlists/${playlist.id}/tracks`,
+                    'POST',
+                    { uris: trackUris }
+                );
+
+                console.log('✅ Tracks added successfully:', addTracksResult);
+
+                return playlist;
+            } catch (error) {
+                console.error('❌ Error creating playlist:', error);
+                console.error('Error details:', {
+                    message: error.message,
+                    stack: error.stack,
+                    username: username,
+                    trackCount: tracks.length
+                });
+                throw error;
+            }
+        }
+
+
+        async function unfollowPlaylist(playlistId) {
+            try {
+                console.log('🚫 Unfollowing playlist:', playlistId);
+                
+                const unfollowResult = await makeSpotifyRequest(
+                    `/playlists/${playlistId}/followers`,
+                    'DELETE'
+                );
+
+                console.log('✅ Successfully unfollowed playlist:', playlistId);
+                console.log('📝 Note: Playlist still exists and is accessible via direct link, but removed from your Following');
+                
+                return unfollowResult;
+            } catch (error) {
+                console.error('❌ Error unfollowing playlist:', error);
+                console.error('Error details:', {
+                    message: error.message,
+                    playlistId: playlistId
+                });
+                // Don't throw error - unfollowing failure shouldn't break the app
+                console.log('⚠️ Continuing despite unfollow error...');
+            }
+        }
+
+        // Generate music roast using OpenAI
+        async function generateMusicRoast(tracks) {
+            try {
+                console.log('🤖 Requesting music roast for tracks:', tracks.length);
+                
+                const response = await fetch('/api/roast', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ tracks })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`Roast API error: ${response.status} - ${errorData.message || errorData.error}`);
+                }
+
+                const data = await response.json();
+                console.log('✅ Roast generated successfully:', data);
+                
+                return data.roast;
+            } catch (error) {
+                console.error('❌ Error generating roast:', error);
+                // Return fallback roast
+                return [
+                    "ur playlist lowkey reads like u asked spotify “give me indie but sprinkle gang violence”",
+                    "frank sinatra remastered in 2008 screams u discovered ur grandpas vinyl collection then got bored",
+                    "nobody new sounds like the title of ur autobiography after one bad date",
+                    "wave to earth and metro in the same setlist like u can't decide if u wanna sip matcha or start a riot",
+                    "ur playlist feels like the soundtrack to an arthouse film about a college kid who shoplifts vinyls for clout",
+                ];
+            }
+        }
+
+        // Chat bubble creation functions
+        function createChatBubble(message, color = 'grey') {
+            const bubbleWrap = document.createElement('div');
+            bubbleWrap.className = 'bubbleWrap';
+            bubbleWrap.style.opacity = '1';
+            
+            const bubble = document.createElement('div');
+            bubble.className = `bubble ${color}`;
+            
+            const messageSpan = document.createElement('span');
+            messageSpan.textContent = message;
+            
+            const corner = document.createElement('div');
+            corner.className = 'corner';
+            
+            bubble.appendChild(messageSpan);
+            bubble.appendChild(corner);
+            bubbleWrap.appendChild(bubble);
+            
+            return bubbleWrap;
+        }
+
+        function addBubbleToChat(message, color = 'grey') {
+            const chatBody = document.getElementById('chat');
+            const bubble = createChatBubble(message, color);
+            chatBody.appendChild(bubble);
+            
+            // Scroll to bottom immediately
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function clearChat() {
+            const chatBody = document.getElementById('chat');
+            chatBody.innerHTML = '';
+        }
+
+        function hideChatLoading() {
+            const loadingElement = document.getElementById('chat-loading');
+            if (loadingElement) {
+                loadingElement.style.display = 'none';
+            }
+        }
+
+        // Display roast as chat bubbles
+        function showRoastAsChatBubbles(roastLines) {
+            console.log('💬 Showing roast as chat bubbles with', roastLines.length, 'lines');
+            
+            // Hide loading screen first
+            hideChatLoading();
+            
+            // First add the user's blue message
+            addBubbleToChat('what did you think of my list', 'blue');
+            
+            // Check if this looks like extracted bullet points or full response
+            const looksLikeExtractedBullets = roastLines.every(line => 
+                line.length < 200 && !line.includes('\n')
+            );
+            
+            if (looksLikeExtractedBullets) {
+                // Display as individual chat bubbles instantly
+                roastLines.forEach((roast) => {
+                    // Remove any fire emojis or bullet points from the beginning
+                    const cleanRoast = roast.replace(/^[🔥•\-\*]\s*/, '').trim();
+                    addBubbleToChat(cleanRoast, 'grey');
+                });
+            } else {
+                // Display full response as single bubble
+                const fullText = roastLines.join(' ');
+                addBubbleToChat(fullText, 'grey');
+            }
+            
+            console.log('✅ Chat bubbles loaded instantly');
+        }
+
+        // Legacy function - redirect to chat bubbles
+        function showRoastTextbox(roastLines) {
+            showRoastAsChatBubbles(roastLines);
+        }
+
+        // Global variable to store the iframe API
+        let spotifyIFrameAPI = null;
+        let pendingPlaylistUri = null;
+        let pendingPlaylistId = null;
+
+        // Initialize Spotify iFrame API - this runs when the API loads
+        window.onSpotifyIframeApiReady = (IFrameAPI) => {
+            console.log('✅ Spotify iFrame API Ready!');
+            spotifyIFrameAPI = IFrameAPI;
+            
+            // If there's a pending playlist, embed it now
+            if (pendingPlaylistUri) {
+                console.log('🎧 Embedding pending playlist:', pendingPlaylistUri);
+                createEmbedController(pendingPlaylistUri, pendingPlaylistId);
+                pendingPlaylistUri = null;
+                pendingPlaylistId = null;
+            }
+        };
+
+        // Create the embed controller
+        function createEmbedController(playlistUri = null, playlistId = null) {
+            const element = document.getElementById('embed-iframe');
+            
+            // Always use the hardcoded playlist
+            const hardcodedPlaylistUri = 'spotify:playlist:5Qld71ycNwBSvwXLqNnDg0';
+            console.log('🎵 Creating embed with hardcoded URI:', hardcodedPlaylistUri);
+            
+            const options = {
+                width: '100%',
+                height: '800',
+                uri: hardcodedPlaylistUri,
+                theme: 'white'
+            };
+
+            const callback = async (EmbedController) => {
+                console.log('✅ Embed Controller Ready - Hardcoded playlist embedded successfully!');
+                console.log('🎵 Embed Controller methods:', Object.getOwnPropertyNames(EmbedController));
+                
+                // No need to unfollow hardcoded playlist since we don't own it
+                console.log('📝 Note: Using hardcoded playlist - no unfollow needed');
+            };
+
+            try {
+                spotifyIFrameAPI.createController(element, options, callback);
+            } catch (error) {
+                console.error('❌ Error creating embed controller:', error);
+                // Show fallback embed using standard iframe
+                createFallbackEmbed(correctUri);
+                
+                // No need to unfollow hardcoded playlist
+                console.log('📝 Note: Using hardcoded playlist in fallback - no unfollow needed');
+            }
+        }
+
+        // Fallback: Create a standard Spotify embed iframe
+        function createFallbackEmbed(playlistUri = null) {
+            // Always use the hardcoded playlist
+            const playlistId = '5Qld71ycNwBSvwXLqNnDg0';
+            console.log('🔄 Creating fallback embed for hardcoded playlist:', playlistId);
+            const element = document.getElementById('embed-iframe');
+            
+            element.innerHTML = `
+                <iframe 
+                    style="border-radius:12px" 
+                    src="https://open.spotify.com/embed/playlist/${playlistId}?utm_source=generator&theme=0" 
+                    width="100%" 
+                    height="600" 
+                    frameBorder="0" 
+                    allowfullscreen="" 
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                    loading="lazy">
+                </iframe>
+            `;
+        }
+
+        // Embed playlist using iFrame API
+        function embedPlaylist(playlistUri, playlistId = null) {
+            console.log('🎵 Attempting to embed playlist:', playlistUri);
+            console.log('🔍 API Ready?', spotifyIFrameAPI !== null);
+            console.log('🔍 Playlist ID for unfollowing:', playlistId);
+            
+            if (spotifyIFrameAPI) {
+                // API is ready, create embed immediately
+                createEmbedController(playlistUri, playlistId);
+            } else {
+                // API not ready yet, store for later
+                console.log('⏳ API not ready, storing playlist for later embedding');
+                pendingPlaylistUri = playlistUri;
+                pendingPlaylistId = playlistId; // Store ID too
+                
+                // Also create fallback embed immediately so user sees something
+                setTimeout(() => {
+                    if (pendingPlaylistUri) {
+                        console.log('🔄 API still not ready, using fallback embed');
+                        createFallbackEmbed(playlistUri);
+                        
+                        // No need to unfollow hardcoded playlist
+                        console.log('📝 Note: Using hardcoded playlist - no unfollow needed');
+                        
+                        pendingPlaylistUri = null;
+                        pendingPlaylistId = null;
+                    }
+                }, 2000);
+            }
+        }
+
+        // Main function to load user data and create playlist
+        async function loadUserDataAndCreatePlaylist() {
+            try {
+                console.log('🚀 Starting app initialization...');
+                console.log('🔑 Access token:', accessToken ? 'Present' : 'Missing');
+
+                console.log('👤 Getting user profile...');
+                // Get user profile
+                const userProfile = await makeSpotifyRequest('/me');
+                username = userProfile.id;
+                console.log('✅ User profile loaded:', userProfile);
+                
+                console.log('🎵 Getting top tracks...');
+                // Get top 10 tracks of the year (long_term = approximately 1 year)
+                const topTracksResponse = await makeSpotifyRequest('/me/top/tracks?limit=10&time_range=long_term');
+                const topTracks = topTracksResponse.items;
+                console.log('✅ Top tracks loaded:', topTracks.length, 'tracks');
+
+                if (topTracks.length === 0) {
+                    throw new Error('No top tracks found. Make sure you have listening history on Spotify.');
+                }
+
+                console.log('📋 Track list ready (not displaying in UI)...');
+                
+
+                console.log('📝 Creating playlist...');
+                // Create playlist from top tracks
+                const playlist = await createPlaylistFromTopTracks(topTracks);
+                
+                console.log('🎧 Embedding playlist...');
+                console.log('🎧 Playlist object:', playlist);
+                console.log('🎧 Playlist URI:', playlist.uri);
+                console.log('🎧 Playlist ID:', playlist.id);
+                
+                // Embed the playlist (unfollow will happen in the embed callback)
+                embedPlaylist(playlist.uri, playlist.id);
+                
+                // Generate and display the roast (parallel to playlist embedding)
+                console.log('🤖 Generating music roast...');
+                try {
+                    const roastLines = await generateMusicRoast(topTracks);
+                    showRoastAsChatBubbles(roastLines);
+                } catch (roastError) {
+                    console.error('❌ Roast generation failed:', roastError);
+                    // Show error message in chat as a bubble
+                    hideChatLoading();
+                    // Add user message first
+                    addBubbleToChat('what did you think of my list', 'blue');
+                    // Then show error message
+                    addBubbleToChat('🤖 AI roast temporarily unavailable, but your playlist is ready! 🎵', 'grey');
+                }
+                
+            } catch (error) {
+                console.error('❌ Main function error:', error);
+                console.error('❌ Error stack:', error.stack);
+                
+                let errorMessage = error.message;
+                if (error.message.includes('401')) {
+                    errorMessage = 'Authentication failed. Please log in again.';
+                } else if (error.message.includes('403')) {
+                    errorMessage = 'Permission denied. Make sure your app has the correct scopes.';
+                } else if (error.message.includes('429')) {
+                    errorMessage = 'Rate limited. Please wait a moment and try again.';
+                }
+                
+                document.querySelector('.main-content').innerHTML = `
+                    <div style="text-align: center; padding: 40px; grid-column: 1 / -1;">
+                        <p style="color: #e74c3c; font-size: 18px; margin-bottom: 10px;">❌ Error: ${errorMessage}</p>
+                        <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Check the browser console for more details.</p>
+                        <button onclick="location.reload()" style="padding: 10px 20px; background: #1DB954; color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 16px;">Try Again</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize app
+        window.addEventListener('load', () => {
+            const params = getHashParams();
+            accessToken = params.access_token;
+            
+            if (accessToken) {
+                // User is logged in
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('data-section').style.display = 'block';
+                loadUserDataAndCreatePlaylist();
+            } else if (params.error) {
+                alert('Error during authentication: ' + params.error);
+            }
+        });
+    </script>
+
+    <!-- Spotify iFrame API - placed in body as per documentation -->
+    <script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
+    <script>
+        // Debug: Check if the script loads
+        console.log('🔄 Spotify iFrame API script tag loaded');
+        
+        // Add a timeout to check if the API becomes available
+        setTimeout(() => {
+            if (!spotifyIFrameAPI) {
+                console.log('⚠️ Spotify iFrame API not loaded after 5 seconds');
+                console.log('⚠️ This might indicate a network issue or API unavailability');
+            }
+        }, 5000);
+    </script>
+</body>
+</html> 
